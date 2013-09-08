@@ -66,12 +66,13 @@ Currently `/stream.json` is accessible from [streaming.wakarimasen.co](http://st
 `http://streaming.wakarimasen.co/stream.json`
 #### Parameters
 ##### Filter
-`board` - String, Board Id - Filter for only posts from this board.
-`thread` - String, "boardId/resto" - Filter for only posts from this thread.
-`comment` - String - Filter for posts that only contain this comment.
-`name` - String - Filter for posts that only match this name (Substring match).
-`trip` - String - Filter for posts that only match this trip (Substring match).
-`email` - String - Filter for posts that only match this email (Substring match).
+
++ `board` - String, Board Id - Filter for only posts from this board.
++ `thread` - String, "boardId/resto" - Filter for only posts from this thread.
++ `comment` - String - Filter for posts that only contain this comment.
++ `name` - String - Filter for posts that only match this name (Substring match).
++ `trip` - String - Filter for posts that only match this trip (Substring match).
++ `email` - String - Filter for posts that only match this email (Substring match).
 
 Filters can be chained, and a post must match *all* the filters. So `/stream.json?name=Diaz&board=a&board=v&comment=hi10p` will only match posts with name Diaz, on the /a/ and /v/ boards, that has "hi10p" in the comment.
 
