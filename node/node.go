@@ -71,6 +71,7 @@ type Node struct {
 	SocketWaitGroup  sync.WaitGroup
 	RoutineWaitGroup sync.WaitGroup
 	OwnedBoards      []string
+	LastNodeIdx      int
 }
 
 func randNodeId() string {
@@ -430,6 +431,7 @@ func (n *Node) divideBoards() {
 		}
 		n.BoardStop = make([]chan bool, 0, 64)
 		n.OwnedBoards = make([]string, 0, 64)
+		n.LastNodeIdx = myNode.NodeIndex
 		for idx, board := range n.Boards.Boards {
 			if len(nodes) != 0 && (idx%len(nodes))+1 == myNode.NodeIndex {
 				bc := make(chan bool)
