@@ -246,7 +246,7 @@ func (n *Node) Bootstrap() error {
 				time.Sleep(2 * time.Second)
 				continue
 			}
-
+			log.Print("Finished connecting, watching nodes...")
 			n.NewNodeWatch = make(chan bool)
 			n.UpdateNodeWatch = make(chan bool)
 			newNodes := make(chan *store.Response)
@@ -367,6 +367,7 @@ func (n *Node) Bootstrap() error {
 			}
 
 			time.Sleep(1 * time.Second)
+			log.Print("Updating node list.")
 			_, isSet, err := n.EtcCluster.TestAndSet(n.Config.Cluster+"/nodes", prevValue, string(newNodeData), 0)
 			if err != nil || isSet != true {
 				log.Print("Failed to update node list. Possibly another node bootstrapped before finish.")
