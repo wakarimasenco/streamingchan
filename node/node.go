@@ -262,6 +262,7 @@ func (n *Node) Bootstrap() error {
 				for !n.Closed {
 					data, err := n.ThreadSubSocket.RecvBytes(zmq3.DONTWAIT)
 					if err == syscall.EAGAIN {
+						time.Sleep(1 * time.Millisecond)
 						continue
 					}
 					var threadInfo fourchan.ThreadInfo
