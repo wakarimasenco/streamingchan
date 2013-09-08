@@ -364,6 +364,11 @@ func (n *Node) Bootstrap() error {
 				n.SocketWaitGroup.Done()
 			}()
 
+			sort.Sort(NodeInfoList(nodes))
+			for idx, _ := range nodes {
+				nodes[idx].NodeIndex = idx + 1
+			}
+
 			newNodeData, _ := json.Marshal(nodes)
 			prevValue := ""
 			if len(resp) > 0 {
@@ -372,6 +377,7 @@ func (n *Node) Bootstrap() error {
 
 			time.Sleep(1 * time.Second)
 			log.Print("Updating node list.")
+
 			_, isSet, err := n.EtcCluster.TestAndSet(n.Config.Cluster+"/nodes", prevValue, string(newNodeData), 0)
 			if err != nil || isSet != true {
 				log.Print("Failed to update node list. Possibly another node bootstrapped before finish.")
@@ -412,7 +418,7 @@ func (n *Node) divideBoards() {
 		sort.Sort(NodeInfoList(nodes))
 		nodeIds := make([]string, 0, 16)
 		for idx, node := range nodes {
-			node.NodeIndex = idx + 1
+			nodes[idx].NodeIndex = idx + 1
 			nodeIds = append(nodeIds, node.NodeId)
 		}
 		newNodeData, _ := json.Marshal(nodes)
@@ -483,6 +489,11 @@ func (n *Node) CleanShutdown() {
 				log.Print("Failed to unmarshhal " + n.Config.Cluster + "/nodes")
 				return
 			}
+			sort.Sort(NodeInfoList(nodes))
+			for idx, _ := range nodes {
+				nodes[idx].NodeIndex = idx + 1
+			}
+
 			newNodes := make([]NodeInfo, 0, 16)
 			for _, node := range nodes {
 				if node.NodeId != n.NodeId {
