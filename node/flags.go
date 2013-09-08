@@ -30,7 +30,7 @@ func init() {
 func flags() *FlagConfig {
 	fc := new(FlagConfig)
 	hostname, _ := os.Hostname()
-	flag.IntVar(&(fc.ThreadWorkers), "ehHc", THREAD_WORKERS, "Node : Number of concurrent thread downloaders.")
+	flag.IntVar(&(fc.ThreadWorkers), "tw", THREAD_WORKERS, "Node : Number of concurrent thread downloaders.")
 	flag.BoolVar(&(fc.Node), "node", false, "Node : Enable node proces. ")
 	flag.StringVar(&(fc.Hostname), "hostname", hostname, "Node : Hostname or ip, visible from other machines on the network. ")
 	flag.StringVar(&(fc.BindIp), "bindip", "127.0.0.1", "Node : Address to bind to.")
