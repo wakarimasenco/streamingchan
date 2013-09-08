@@ -190,7 +190,7 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	stop := make(chan bool)
+	//stop := make(chan bool)
 	updateNodes := make(chan *store.Response)
 	updateNodeWatch := make(chan bool)
 
@@ -247,7 +247,7 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	updateNodeWatch <- true
 	subSocket.Close()
-	stop <- true
+	//stop <- true
 }
 
 func NewApiServer(flags *FlagConfig, stop chan<- bool) *ApiServer {
