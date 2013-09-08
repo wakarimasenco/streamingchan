@@ -57,6 +57,7 @@ func (ns *NodeServer) statusHandler(w http.ResponseWriter, r *http.Request) {
 		"posts_published":   ns.Node.Stats.Lifetime.Posts,
 		"stats":             stats,
 		"nodeidx":           ns.Node.LastNodeIdx,
+		"nodecount":         ns.Node.NodeCount,
 	}
 	//log.Print("Serving ", r.URL.Path)
 

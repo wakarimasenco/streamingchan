@@ -72,6 +72,8 @@ type Node struct {
 	RoutineWaitGroup sync.WaitGroup
 	OwnedBoards      []string
 	LastNodeIdx      int
+	NodeCount        int
+	DivideMutex      sync.Mutex
 }
 
 func randNodeId() string {
@@ -392,6 +394,8 @@ func (n *Node) Bootstrap() error {
 }
 
 func (n *Node) divideBoards() {
+	n.DivideMutex.Lock()
+	defer n.DivideMutex.Unlock()
 	if n.BoardStop != nil {
 		for _, c := range n.BoardStop {
 			c <- true
@@ -432,6 +436,7 @@ func (n *Node) divideBoards() {
 		n.BoardStop = make([]chan bool, 0, 64)
 		n.OwnedBoards = make([]string, 0, 64)
 		n.LastNodeIdx = myNode.NodeIndex
+		n.NodeCount = len(nodes)
 		for idx, board := range n.Boards.Boards {
 			if len(nodes) != 0 && (idx%len(nodes))+1 == myNode.NodeIndex {
 				bc := make(chan bool)
