@@ -151,6 +151,27 @@ func NewNode(flags *FlagConfig) *Node {
 	return n
 }
 
+func (n *Node) rollbackBootstrap() {
+	if n.ThreadSubSocket != nil {
+		n.ThreadSubSocket.Close()
+		n.ThreadSubSocket = nil
+		n.SocketWaitGroup.Done()
+	}
+
+	if n.ThreadPubSocket != nil {
+		n.ThreadPubSocket.Close()
+		n.ThreadPubSocket = nil
+		n.SocketWaitGroup.Done()
+	}
+
+	if n.PostPubSocket != nil {
+		n.PostPubSocket.Close()
+		n.PostPubSocket = nil
+		n.SocketWaitGroup.Done()
+	}
+
+}
+
 func (n *Node) Bootstrap() error {
 	log.Print("Bootstrapping node...")
 	n.NodeId = randNodeId()
@@ -179,7 +200,6 @@ func (n *Node) Bootstrap() error {
 		log.Print("Failed to create Post Pub Socket: ", err)
 		return err
 	}
-	n.SocketWaitGroup.Add(2)
 
 	if err := n.ThreadPubSocket.Bind(fmt.Sprintf("tcp://%s:%d", n.Config.BindIp, tpubport)); err != nil {
 		log.Print((fmt.Sprintf("tcp://%s:%d", n.Config.BindIp, tpubport)))
@@ -190,6 +210,7 @@ func (n *Node) Bootstrap() error {
 		log.Print("Failed to bind Post Sub Socket: ", err)
 		return err
 	}
+	n.SocketWaitGroup.Add(2)
 
 	n.EtcCluster = etcd.NewClient()
 	if n.Config.Etcd != nil {
@@ -244,9 +265,9 @@ func (n *Node) Bootstrap() error {
 				}
 			}
 			if failureErr != nil {
-				n.Close()
 				log.Print("Failed to create Thread Sub Socket: ", err)
 				time.Sleep(2 * time.Second)
+				n.rollbackBootstrap()
 				continue
 			}
 			log.Print("Finished connecting, watching nodes...")
@@ -258,6 +279,28 @@ func (n *Node) Bootstrap() error {
 			n.ThreadPub = make(chan fourchan.ThreadInfo)
 			n.PostPub = make(chan fourchan.Post)
 			n.ThreadSub = make(chan fourchan.ThreadInfo)
+
+			sort.Sort(NodeInfoList(nodes))
+			for idx, _ := range nodes {
+				nodes[idx].NodeIndex = idx + 1
+			}
+
+			newNodeData, _ := json.Marshal(nodes)
+			prevValue := ""
+			if len(resp) > 0 {
+				prevValue = resp[0].Value
+			}
+
+			time.Sleep(1 * time.Second)
+			log.Print("Updating node list.")
+
+			_, isSet, err := n.EtcCluster.TestAndSet(n.Config.Cluster+"/nodes", prevValue, string(newNodeData), 0)
+			if err != nil || isSet != true {
+				log.Print("Failed to update node list. Possibly another node bootstrapped before finish.")
+				//n.Close()
+				n.rollbackBootstrap()
+				continue
+			}
 
 			go n.bootstrapThreadWorkers()
 
@@ -364,26 +407,6 @@ func (n *Node) Bootstrap() error {
 				n.SocketWaitGroup.Done()
 			}()
 
-			sort.Sort(NodeInfoList(nodes))
-			for idx, _ := range nodes {
-				nodes[idx].NodeIndex = idx + 1
-			}
-
-			newNodeData, _ := json.Marshal(nodes)
-			prevValue := ""
-			if len(resp) > 0 {
-				prevValue = resp[0].Value
-			}
-
-			time.Sleep(1 * time.Second)
-			log.Print("Updating node list.")
-
-			_, isSet, err := n.EtcCluster.TestAndSet(n.Config.Cluster+"/nodes", prevValue, string(newNodeData), 0)
-			if err != nil || isSet != true {
-				log.Print("Failed to update node list. Possibly another node bootstrapped before finish.")
-				n.Close()
-				continue
-			}
 			//log.Print("SETTING")
 			n.EtcCluster.Set(n.Config.Cluster+"/add-node/"+n.NodeId, fmt.Sprintf("%s:%d", n.Config.Hostname, tpubport), 600)
 			n.EtcCluster.Set(n.Config.Cluster+"/add-postpub/"+n.NodeId, fmt.Sprintf("%s:%d", n.Config.Hostname, ppubport), 600)
