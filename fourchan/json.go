@@ -6,7 +6,7 @@ type Post struct {
 	Resto          int         `json:"resto"`
 	Sticky         uint8       `json:"sticky"`
 	Closed         uint8       `json:"closed"`
-	Now            string      `json:"string"`
+	Now            string      `json:"now"`
 	Time           int         `json:"time"`
 	Name           string      `json:"name"`
 	Trip           string      `json:"trip"`
