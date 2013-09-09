@@ -70,13 +70,13 @@ func (n *Node) ProcessBoard(nodeIds []string, board string, stop <-chan bool) {
 			}
 		}
 		multiplier := 1
+		maxMod := 0
 		timeout := make(chan bool, 1)
 		n.EtcCluster.Set(n.Config.Cluster+"/boards-owner/"+board, n.NodeId, 0)
 		defer n.EtcCluster.TestAndSet(n.Config.Cluster+"/boards-owner/"+board, n.NodeId, "none", 0)
 		for {
 			oldLM := lastModified
 			if threads, statusCode, lastModifiedStr, e := fourchan.DownloadBoard(board, lastModifiedHeader); e == nil {
-				maxMod := 0
 				lastModifiedHeader, _ = time.Parse(http.TimeFormat, lastModifiedStr)
 				//log.Print("LM : ", lastModified)
 				for _, page := range threads {
