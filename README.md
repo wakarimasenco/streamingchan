@@ -83,7 +83,7 @@ Returns and unbounded list of JSON post objects as defined by the [4Chan API](ht
 
 Each json object will be seperated by a carriage return (`\r\n`). Any new lines in the post will be denoted with a regular new line (`\n`).
 
-If the API hasn't sent a message in atleast 30 seconds, the API will send a blank line ('\r\n').
+If the API hasn't sent a message in atleast 30 seconds, the API will send a blank line (`\r\n`). If nothing has ever been sent, the API will send an empty JSON object, followed by a carriage return (`{}\r\n`).
 
 ## TODO
 

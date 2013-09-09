@@ -219,9 +219,14 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 	subSocket.SetSubscribe("")
 	w.WriteHeader(200)
 	lastMessage := time.Now()
+	messageSent := false
 	for {
 		if time.Now().Sub(lastMessage) > (30 * time.Second) {
-			if _, err := fmt.Fprint(w, "\r\n"); err != nil {
+			m := "{}\r\n"
+			if messageSent {
+				m = "\r\n"
+			}
+			if _, err := fmt.Fprint(w, m); err != nil {
 				break
 			}
 			lastMessage = time.Now()
@@ -258,6 +263,7 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		as.Stats.Incr(node.METRIC_POSTS, 1)
 		lastMessage = time.Now()
+		messageSent = true
 	}
 	updateNodeWatch <- true
 	subSocket.Close()
