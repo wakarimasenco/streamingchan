@@ -5,6 +5,7 @@ import (
 	"github.com/coreos/go-etcd/etcd"
 	"github.com/wakarimasenco/streamingchan/fourchan"
 	"log"
+	"net/http"
 	"strconv"
 	"time"
 )
@@ -62,6 +63,7 @@ func (n *Node) ProcessBoard(nodeIds []string, board string, stop <-chan bool) {
 	resp, err := n.EtcCluster.Get(n.Config.Cluster + "/boards/" + board)
 	if err == nil || (isEtcdError(err) && (err.(etcd.EtcdError)).ErrorCode == 100) {
 		lastModified := 0
+		var lastModifiedHeader time.Time
 		if err == nil {
 			if lastModified, err = strconv.Atoi(resp[0].Value); err != nil {
 				lastModified = 0
@@ -73,8 +75,9 @@ func (n *Node) ProcessBoard(nodeIds []string, board string, stop <-chan bool) {
 		defer n.EtcCluster.TestAndSet(n.Config.Cluster+"/boards-owner/"+board, n.NodeId, "none", 0)
 		for {
 			oldLM := lastModified
-			if threads, e := fourchan.DownloadBoard(board); e == nil {
+			if threads, statusCode, lastModifiedStr, e := fourchan.DownloadBoard(board, lastModifiedHeader); e == nil {
 				maxMod := 0
+				lastModifiedHeader, _ = time.Parse(http.TimeFormat, lastModifiedStr)
 				//log.Print("LM : ", lastModified)
 				for _, page := range threads {
 					for _, thread := range page.Threads {
@@ -98,7 +101,7 @@ func (n *Node) ProcessBoard(nodeIds []string, board string, stop <-chan bool) {
 					}
 				}
 				lastModified = maxMod
-			} else {
+			} else if statusCode != 304 {
 				log.Print("Error downloading board ", board, " ", e)
 			}
 			if oldLM != lastModified {
