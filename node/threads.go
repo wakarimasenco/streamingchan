@@ -17,6 +17,7 @@ func (n *Node) ProcessThread(threadInfo fourchan.ThreadInfo) {
 					if n.PostPub == nil {
 						return
 					}
+					post.MachineId = n.NodeId
 					n.PostPub <- post
 					z++
 				}
