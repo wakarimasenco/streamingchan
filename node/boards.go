@@ -82,11 +82,12 @@ func (n *Node) ProcessBoard(nodeIds []string, board string, stop <-chan bool) {
 				for _, page := range threads {
 					for _, thread := range page.Threads {
 						if thread.LastModified > lastModified && lastModified != 0 {
-							var ti fourchan.ThreadInfo
-							ti = thread // copy
-							ti.Board = page.Board
-							ti.LastModified = lastModified
-							ti.OwnerId = nodeIds[(message % len(nodeIds))]
+							//var ti fourchan.ThreadInfo
+							//ti = thread // copy
+							//ti.Board = page.Board
+							//ti.LastModified = lastModified
+							thread.MinPost = lastModified
+							thread.OwnerId = nodeIds[(message % len(nodeIds))]
 							message++
 							if n.ThreadPub == nil {
 								return

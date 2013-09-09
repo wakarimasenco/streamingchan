@@ -405,7 +405,10 @@ func (n *Node) Bootstrap() error {
 					}
 					for tries := 0; tries < 16; tries++ {
 						_, e := n.PostPubSocket.SendBytes(buff.Bytes(), zmq3.DONTWAIT)
-						if e == nil {
+						if e == syscall.EAGAIN {
+							time.Sleep(1 * time.Millisecond)
+							continue
+						} else if e == nil {
 							break
 						}
 					}
