@@ -17,9 +17,6 @@ func (n *Node) ProcessThread(threadInfo fourchan.ThreadInfo) {
 					if n.PostPub == nil {
 						return
 					}
-					post.MachineId = n.NodeId
-					post.RangeMin = threadInfo.MinPost
-					post.RangeMax = threadInfo.LastModified
 					n.PostPub <- post
 					z++
 				}
