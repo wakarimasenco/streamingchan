@@ -230,7 +230,6 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 			time.Sleep(1 * time.Millisecond)
 			continue
 		}
-		counter = 0
 		var post fourchan.Post
 		dec := gob.NewDecoder(bytes.NewBuffer(data))
 		err = dec.Decode(&post)
@@ -257,7 +256,7 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 			f.Flush()
 		}
 		as.Stats.Incr(node.METRIC_POSTS, 1)
-		lastMessage := time.Now()
+		lastMessage = time.Now()
 	}
 	updateNodeWatch <- true
 	subSocket.Close()
