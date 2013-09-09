@@ -83,13 +83,13 @@ func (as *ApiServer) commandHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	if strings.Contains(r.URL.Path, "/commands/stop") {
-		go func() { as.stop <- true }()
 		p := map[string]interface{}{
 			"ok":      1,
 			"message": "Stop command sent, check logs",
 		}
 		data, _ := json.Marshal(p)
 		fmt.Fprint(w, string(data))
+		go func() { as.stop <- true }()
 		return
 	} else {
 		p := map[string]interface{}{
