@@ -229,6 +229,9 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 			if _, err := fmt.Fprint(w, m); err != nil {
 				break
 			}
+			if f, ok := w.(http.Flusher); ok {
+				f.Flush()
+			}
 			lastMessage = time.Now()
 		}
 		data, err := subSocket.RecvBytes(zmq3.DONTWAIT)
