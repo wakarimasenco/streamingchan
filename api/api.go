@@ -222,7 +222,7 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 		if err == syscall.EAGAIN {
 			time.Sleep(1 * time.Millisecond)
 			counter++
-			if counter%30*1000 == 0 {
+			if counter%(30*1000) == 0 {
 				if _, err := fmt.Fprint(w, "\r\n"); err != nil {
 					break
 				}
