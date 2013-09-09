@@ -291,6 +291,7 @@ func (n *Node) Bootstrap() error {
 				for response := range newNodes {
 					if response.Action == "SET" {
 						if fmt.Sprintf("%s:%d", n.Config.Hostname, tpubport) != response.Value {
+							log.Print("Connecting to ", fmt.Sprintf("tcp://%s", response.Value))
 							e := n.ThreadSubSocket.Connect(fmt.Sprintf("tcp://%s", response.Value))
 							if e != nil {
 								log.Print("Failed to connect to", fmt.Sprintf("tcp://%s", response.Value), ":", e)
@@ -385,7 +386,10 @@ func (n *Node) Bootstrap() error {
 					}
 					for tries := 0; tries < 16; tries++ {
 						_, e := n.ThreadPubSocket.SendBytes(buff.Bytes(), zmq3.DONTWAIT)
-						if e == nil {
+						if e == syscall.EAGAIN {
+							time.Sleep(1 * time.Millisecond)
+							continue
+						} else if e == nil {
 							break
 						}
 					}

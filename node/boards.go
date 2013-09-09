@@ -86,13 +86,14 @@ func (n *Node) ProcessBoard(nodeIds []string, board string, stop <-chan bool) {
 							//ti = thread // copy
 							//ti.Board = page.Board
 							//ti.LastModified = lastModified
+							thread.Board = page.Board
 							thread.MinPost = lastModified
 							thread.OwnerId = nodeIds[(message % len(nodeIds))]
 							message++
 							if n.ThreadPub == nil {
 								return
 							}
-							//log.Printf("Sending %d", ti.No)
+							//log.Printf("Sending %d to %s", thread.No, thread.OwnerId)
 							n.ThreadPub <- thread
 							multiplier = 1
 						}
