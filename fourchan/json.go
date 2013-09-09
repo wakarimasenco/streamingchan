@@ -36,8 +36,8 @@ type Post struct {
 	CapcodeReplies interface{} `json:"capcode_replies"`
 	LastModified   int         `json:"last_modified"`
 	MachineId      string      `json:"debug_machine"`
-	RangeMin       string      `json:"debug_range_min"`
-	RangeMax       string      `json:"debug_range_max"`
+	RangeMin       int         `json:"debug_range_min"`
+	RangeMax       int         `json:"debug_range_max"`
 }
 
 type Thread struct {

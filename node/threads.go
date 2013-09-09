@@ -1,7 +1,6 @@
 package node
 
 import (
-	"fmt"
 	"github.com/wakarimasenco/streamingchan/fourchan"
 	"time"
 )
