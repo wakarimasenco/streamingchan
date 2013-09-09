@@ -26,14 +26,14 @@ First, ensure you have atleast one `etcd` instance running somewhere.
 Nodes are responsible for download data from the 4Chan Api. To run a node, run `streamingchan -node`
 ##### Command Line Options
 
-+ `etcd` - Etcd Machines - *Required:* Comma seperated list of etcd machines. Ex. -etcd="http://127.0.0.1:4001,http://192.168.1.3:4001"
++ `etcd` - Etcd Machines - *Required:* Comma seperated list of etcd machines. Ex. `-etcd="http://127.0.0.1:4001,http://192.168.1.3:4001"`
 + `tw` - Threads - Number of thread downloaders running concurrently. Default : 10
 + `hostname` - Hostname - Hostname or IP of this machine that will be visible to other machines on the network. Default : OS default
-+ `bindip` - Bind IP - Interface to bind to. Use 0.0.0.0 to bind to all. Default : 127.0.0.1
++ `bindip` - Bind IP - Interface to bind to. Use 0.0.0.0 to bind to all. Default : `127.0.0.1`
 + `clustername` - Cluster Name - Run multiple clusters on the same etcd cluster with this option. Default : streamingchan
 + `onlyboards` - Only Boards - Only download from this comma seperated list of boards. If empty, download from all boards.
-+ `excludeboards` - Exclude Boards - Exclude these boards from being downloads. Ex. "-excludeboards=b,sp,v"
-+ `httpport` - Http Port - Each node will expose a /status/ and /commands/ api.
++ `excludeboards` - Exclude Boards - Exclude these boards from being downloads. Ex. `-excludeboards=b,sp,v`
++ `httpport` - Http Port - Each node will expose a `/status/` and `/commands/` api.
 
 #### Node Http Server
 The Node's http server is useful for looking at stats or sending commands.
@@ -41,7 +41,7 @@ The Node's http server is useful for looking at stats or sending commands.
 
 + `/status/` - Returns a JSON response with various stats.
 + `/commands/` - Executes commands on the node server.
-++ `/commands/stop` - Stops the server
++ `/commands/stop` - Stops the server
 
 #### Example cmdline
 `streamingchan -node -etcd="http://127.0.0.1:4001" -onlyboards="b" -hostname="127.0.0.1"`
@@ -50,8 +50,8 @@ The Node's http server is useful for looking at stats or sending commands.
 API servers are the endpoints that stream all the post data.
 ##### Command Line Options
 
-+ `etcd` - Etcd Machines - *Required:* Comma seperated list of etcd machines. Ex. -etcd="http://127.0.0.1:4001,http://192.168.1.3:4001"
-+ `bindip` - Bind IP (Ignored) - Interface to bind to. Use 0.0.0.0 to bind to all. Default : 127.0.0.1
++ `etcd` - Etcd Machines - *Required:* Comma seperated list of etcd machines. Ex. `-etcd="http://127.0.0.1:4001,http://192.168.1.3:4001"`
++ `bindip` - Bind IP (Ignored) - Interface to bind to. Use 0.0.0.0 to bind to all. Default : `127.0.0.1`
 + `clustername` - Cluster Name - Run multiple clusters on the same etcd cluster with this option. Default : streamingchan
 + `httpport` - Http Port - Port to listen on
 
@@ -82,6 +82,8 @@ Threads must be denoted like this "boardId/resto" (Ex. `/stream.json?thread=sp/2
 Returns and unbounded list of JSON post objects as defined by the [4Chan API](https://github.com/4chan/4chan-API#posts-object), with one exception. A field `board` has been added to denote the board the post originated from.
 
 Each json object will be seperated by a carriage return (`\r\n`). Any new lines in the post will be denoted with a regular new line (`\n`).
+
+If the API hasn't sent a message in atleast 30 seconds, the API will send a blank line ('\r\n').
 
 ## TODO
 
