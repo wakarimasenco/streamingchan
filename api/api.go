@@ -216,8 +216,19 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 	}(updateNodes)
 
 	subSocket.SetSubscribe("")
-	for {
-		data, err := subSocket.RecvBytes(0)
+	for counter := 0; ; {
+		data, err := subSocket.RecvBytes(zmq3.DONTWAIT)
+		if err == syscall.EAGAIN {
+			time.Sleep(1 * time.Millisecond)
+			counter++
+			if counter%30*1000 == 0 {
+				if _, err := fmt.Fprint(w, "\r\n"); err != nil {
+					break
+				}
+			}
+			continue
+		}
+		counter = 0
 		var post fourchan.Post
 		dec := gob.NewDecoder(bytes.NewBuffer(data))
 		err = dec.Decode(&post)
