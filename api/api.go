@@ -217,6 +217,7 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 	}(updateNodes)
 
 	subSocket.SetSubscribe("")
+	w.WriteHeader(200)
 	for counter := 0; ; {
 		data, err := subSocket.RecvBytes(zmq3.DONTWAIT)
 		if err == syscall.EAGAIN {
