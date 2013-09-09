@@ -1,6 +1,7 @@
 package node
 
 import (
+	"fmt"
 	"github.com/wakarimasenco/streamingchan/fourchan"
 	"time"
 )
@@ -18,6 +19,8 @@ func (n *Node) ProcessThread(threadInfo fourchan.ThreadInfo) {
 						return
 					}
 					post.MachineId = n.NodeId
+					post.RangeMin = threadInfo.MinPost
+					post.RangeMax = threadInfo.LastModified
 					n.PostPub <- post
 					z++
 				}
