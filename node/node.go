@@ -170,6 +170,13 @@ func (n *Node) rollbackBootstrap() {
 		n.SocketWaitGroup.Done()
 	}
 
+	if n.NewNodeWatch != nil {
+		n.NewNodeWatch <- true
+	}
+	if n.UpdateNodeWatch != nil {
+		n.UpdateNodeWatch <- true
+	}
+
 }
 
 func (n *Node) Bootstrap() error {
@@ -280,6 +287,47 @@ func (n *Node) Bootstrap() error {
 			n.PostPub = make(chan fourchan.Post)
 			n.ThreadSub = make(chan fourchan.ThreadInfo)
 
+			go func(newNodes <-chan *store.Response) {
+				for response := range newNodes {
+					if response.Action == "SET" {
+						if fmt.Sprintf("%s:%d", n.Config.Hostname, tpubport) != response.Value {
+							e := n.ThreadSubSocket.Connect(fmt.Sprintf("tcp://%s", response.Value))
+							if e != nil {
+								log.Print("Failed to connect to", fmt.Sprintf("tcp://%s", response.Value), ":", e)
+							}
+						}
+					}
+				}
+			}(newNodes)
+
+			go func(newNodes chan *store.Response) {
+				for {
+					_, e := n.EtcCluster.Watch(n.Config.Cluster+"/add-node", 0, newNodes, n.NewNodeWatch)
+					if e.Error() == "User stoped watch" {
+						break
+					}
+				}
+				close(newNodes)
+			}(newNodes)
+
+			go func(updateNodes chan *store.Response) {
+				for response := range updateNodes {
+					if response.Action == "SET" && response.Key == "/"+n.Config.Cluster+"/nodes" {
+						n.divideBoards()
+					}
+				}
+			}(updateNodes)
+
+			go func(updateNodes chan *store.Response) {
+				for {
+					_, e := n.EtcCluster.Watch(n.Config.Cluster+"/nodes", 0, updateNodes, n.UpdateNodeWatch)
+					if e.Error() == "User stoped watch" {
+						break
+					}
+				}
+				close(updateNodes)
+			}(updateNodes)
+
 			sort.Sort(NodeInfoList(nodes))
 			for idx, _ := range nodes {
 				nodes[idx].NodeIndex = idx + 1
@@ -325,47 +373,6 @@ func (n *Node) Bootstrap() error {
 				n.ThreadSubSocket.Close()
 				n.SocketWaitGroup.Done()
 			}()
-
-			go func(newNodes <-chan *store.Response) {
-				for response := range newNodes {
-					if response.Action == "SET" {
-						if fmt.Sprintf("%s:%d", n.Config.Hostname, tpubport) != response.Value {
-							e := n.ThreadSubSocket.Connect(fmt.Sprintf("tcp://%s", response.Value))
-							if e != nil {
-								log.Print("Failed to connect to", fmt.Sprintf("tcp://%s", response.Value), ":", e)
-							}
-						}
-					}
-				}
-			}(newNodes)
-
-			go func(newNodes chan *store.Response) {
-				for {
-					_, e := n.EtcCluster.Watch(n.Config.Cluster+"/add-node", 0, newNodes, n.NewNodeWatch)
-					if e.Error() == "User stoped watch" {
-						break
-					}
-				}
-				close(newNodes)
-			}(newNodes)
-
-			go func(updateNodes chan *store.Response) {
-				for response := range updateNodes {
-					if response.Action == "SET" && response.Key == "/"+n.Config.Cluster+"/nodes" {
-						n.divideBoards()
-					}
-				}
-			}(updateNodes)
-
-			go func(updateNodes chan *store.Response) {
-				for {
-					_, e := n.EtcCluster.Watch(n.Config.Cluster+"/nodes", 0, updateNodes, n.UpdateNodeWatch)
-					if e.Error() == "User stoped watch" {
-						break
-					}
-				}
-				close(updateNodes)
-			}(updateNodes)
 
 			go func() {
 				for threadInfo := range n.ThreadPub {
