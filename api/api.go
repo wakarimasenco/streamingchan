@@ -218,16 +218,16 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 
 	subSocket.SetSubscribe("")
 	w.WriteHeader(200)
-	for counter := 0; ; {
+	lastMessage := time.Now()
+	for {
+		if time.Now().Sub(lastMessage) > (30 * time.Second) {
+			if _, err := fmt.Fprint(w, "\r\n"); err != nil {
+				break
+			}
+		}
 		data, err := subSocket.RecvBytes(zmq3.DONTWAIT)
 		if err == syscall.EAGAIN {
 			time.Sleep(1 * time.Millisecond)
-			counter++
-			if counter%(30*1000) == 0 {
-				if _, err := fmt.Fprint(w, "\r\n"); err != nil {
-					break
-				}
-			}
 			continue
 		}
 		counter = 0
@@ -257,6 +257,7 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 			f.Flush()
 		}
 		as.Stats.Incr(node.METRIC_POSTS, 1)
+		lastMessage := time.Now()
 	}
 	updateNodeWatch <- true
 	subSocket.Close()
