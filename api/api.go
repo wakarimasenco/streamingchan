@@ -89,7 +89,11 @@ func (as *ApiServer) commandHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		data, _ := json.Marshal(p)
 		fmt.Fprint(w, string(data))
-		go func() { as.stop <- true }()
+		log.Print("Recieved command to shutdown. Shutting down in 2 seconds.")
+		go func() {
+			time.Sleep(2 * time.Second)
+			as.stop <- true
+		}()
 		return
 	} else {
 		p := map[string]interface{}{
