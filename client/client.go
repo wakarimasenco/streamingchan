@@ -34,14 +34,14 @@ func (c *Client) readLoop() {
 
 func (c *Client) GetStream() <-chan fourchan.Post {
 	if c.stream == nil {
-		panic("Attempted to get stream before stream has started.")
+		panic("Attempted to read stream before stream has started.")
 	}
 	return c.stream
 }
 
 func (c *Client) NextPost() fourchan.Post {
 	if c.stream == nil {
-		panic("Attempted to get stream before stream has started.")
+		panic("Attempted to read stream before stream has started.")
 	}
 	return <-c.stream
 }
