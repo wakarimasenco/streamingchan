@@ -11,8 +11,7 @@ import (
 )
 
 type Client struct {
-	StreamUri string
-
+	StreamUri  string
 	decoder    *json.Decoder
 	connection net.Conn
 	client     *http.Client
