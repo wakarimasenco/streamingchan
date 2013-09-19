@@ -85,6 +85,10 @@ Each json object will be seperated by a carriage return (`\r\n`). Any new lines 
 
 If the API hasn't sent a message in atleast 30 seconds, the API will send a blank line (`\r\n`). If nothing has ever been sent, the API will send an empty JSON object, followed by a carriage return (`{}\r\n`).
 
+
+#### Example
+`curl -LN "streaming.wakarimasen.co/stream.json"`
+
 ## TODO
 
 + Purge Dead Nodes
