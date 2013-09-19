@@ -52,17 +52,26 @@ func NewNodeStats() *NodeStats {
 
 	go func() {
 		for counter := 1; ; counter++ {
+			(ns.FiveSec.Value.(*NodeMetrics)).Zero()
 			ns.FiveSec = ns.FiveSec.Move(1)
 			if counter%12 == 0 {
+				(ns.OneMin.Value.(*NodeMetrics)).Zero()
 				ns.OneMin = ns.OneMin.Move(1)
 			}
 			if counter%720 == 0 {
+				(ns.OneHour.Value.(*NodeMetrics)).Zero()
 				ns.OneHour = ns.OneHour.Move(1)
 			}
 			time.Sleep(5 * time.Second)
 		}
 	}()
 	return ns
+}
+
+func (nm *NodeMetrics) Zero() {
+	nm.BoardRequests = 0
+	nm.Threads = 0
+	nm.Posts = 0
 }
 
 func (ns *NodeStats) Aggregate(metric int, ringCon int, count int) int64 {
