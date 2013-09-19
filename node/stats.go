@@ -52,15 +52,15 @@ func NewNodeStats() *NodeStats {
 
 	go func() {
 		for counter := 1; ; counter++ {
-			(ns.FiveSec.Value.(*NodeMetrics)).Zero()
 			ns.FiveSec = ns.FiveSec.Move(1)
+			(ns.FiveSec.Value.(*NodeMetrics)).Zero()
 			if counter%12 == 0 {
-				(ns.OneMin.Value.(*NodeMetrics)).Zero()
 				ns.OneMin = ns.OneMin.Move(1)
+				(ns.OneMin.Value.(*NodeMetrics)).Zero()
 			}
 			if counter%720 == 0 {
-				(ns.OneHour.Value.(*NodeMetrics)).Zero()
 				ns.OneHour = ns.OneHour.Move(1)
+				(ns.OneHour.Value.(*NodeMetrics)).Zero()
 			}
 			time.Sleep(5 * time.Second)
 		}
