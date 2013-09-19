@@ -55,18 +55,25 @@ func (as *ApiServer) statusHandler(w http.ResponseWriter, r *http.Request) {
 			"1hr":  as.Stats.Aggregate(node.METRIC_POSTS, node.TIME_1MIN, 60),
 			"1d":   as.Stats.Aggregate(node.METRIC_POSTS, node.TIME_1HOUR, 24),
 		},
+		"new_connections": map[string]interface{}{
+			"1hr": as.Stats.Aggregate(node.METRIC_CONNECTIONS, node.TIME_1MIN, 60),
+			"6hr": as.Stats.Aggregate(node.METRIC_CONNECTIONS, node.TIME_1HOUR, 6),
+			"1d":  as.Stats.Aggregate(node.METRIC_CONNECTIONS, node.TIME_1HOUR, 24),
+			"3d":  as.Stats.Aggregate(node.METRIC_CONNECTIONS, node.TIME_1HOUR, 73),
+		},
 	}
 	data := map[string]interface{}{
-		"ok":              1,
-		"revision":        version.GitHash,
-		"build_date":      version.BuildDate,
-		"cmd_line":        as.Config.CmdLine,
-		"runtime":         time.Since(as.Stats.StartTime),
-		"memory":          memStats.Alloc,
-		"processId":       os.Getpid(),
-		"posts_processed": as.Stats.Lifetime.Posts,
-		"stats":           stats,
-		"connections":     as.Connections,
+		"ok":                   1,
+		"revision":             version.GitHash,
+		"build_date":           version.BuildDate,
+		"cmd_line":             as.Config.CmdLine,
+		"runtime":              time.Since(as.Stats.StartTime),
+		"memory":               memStats.Alloc,
+		"processId":            os.Getpid(),
+		"posts_processed":      as.Stats.Lifetime.Posts,
+		"lifetime_connections": as.Stats.Lifetime.Connections,
+		"stats":                stats,
+		"connections":          as.Connections,
 	}
 	//log.Print("Serving ", r.URL.Path)
 
@@ -147,6 +154,7 @@ func (as *ApiServer) streamHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	as.Stats.Incr(node.METRIC_CONNECTIONS, 1)
 	atomic.AddInt64(&as.Connections, 1)
 	defer atomic.AddInt64(&as.Connections, -1)
 

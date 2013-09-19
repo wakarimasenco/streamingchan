@@ -10,6 +10,7 @@ const (
 	METRIC_BOARD_REQUESTS = iota
 	METRIC_THREADS        = iota
 	METRIC_POSTS          = iota
+	METRIC_CONNECTIONS    = iota
 
 	TIME_5SEC  = iota
 	TIME_1MIN  = iota
@@ -29,6 +30,7 @@ type NodeMetrics struct {
 	BoardRequests int64
 	Threads       int64
 	Posts         int64
+	Connections   int64
 }
 
 func NewNodeStats() *NodeStats {
@@ -72,6 +74,7 @@ func (nm *NodeMetrics) Zero() {
 	nm.BoardRequests = 0
 	nm.Threads = 0
 	nm.Posts = 0
+	nm.Connections = 0
 }
 
 func (ns *NodeStats) Aggregate(metric int, ringCon int, count int) int64 {
@@ -94,6 +97,8 @@ func (ns *NodeStats) Aggregate(metric int, ringCon int, count int) int64 {
 			v += (n.Value.(*NodeMetrics)).Threads
 		case METRIC_POSTS:
 			v += (n.Value.(*NodeMetrics)).Posts
+		case METRIC_CONNECTIONS:
+			v += (n.Value.(*NodeMetrics)).Connections
 		}
 		n = n.Prev()
 	}
@@ -109,6 +114,8 @@ func (ns *NodeStats) Incr(metric int, by int64) {
 			atomic.AddInt64(&(((*r).Value.(*NodeMetrics)).Threads), by)
 		case METRIC_POSTS:
 			atomic.AddInt64(&(((*r).Value.(*NodeMetrics)).Posts), by)
+		case METRIC_CONNECTIONS:
+			atomic.AddInt64(&(((*r).Value.(*NodeMetrics)).Connections), by)
 		}
 	}
 
@@ -119,5 +126,7 @@ func (ns *NodeStats) Incr(metric int, by int64) {
 		atomic.AddInt64(&ns.Lifetime.Threads, by)
 	case METRIC_POSTS:
 		atomic.AddInt64(&ns.Lifetime.Posts, by)
+	case METRIC_CONNECTIONS:
+		atomic.AddInt64(&ns.Lifetime.Connections, by)
 	}
 }
